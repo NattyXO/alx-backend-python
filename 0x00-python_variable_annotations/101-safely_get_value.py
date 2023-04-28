@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """ Annotates function params and return values """
 
-from typing import Dict
+from typing import Mapping, Any, TypeVar, Union
 
+T = TypeVar('T')
 
-def safely_get_value(dct, key, default = None):
-    """ Duck-typing """
+def safely_get_value(dct: Mapping, key: Any, default: Union[T, None] = None) -> Union[Any, T]:
     if key in dct:
         return dct[key]
     else:
         return default
+
