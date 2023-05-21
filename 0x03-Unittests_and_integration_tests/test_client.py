@@ -8,18 +8,26 @@ import client
 from client import GithubOrgClient
 
 class TestGithubOrgClient(TestCase):
-    def test_public_repos_url(self):
+    @patch('client.get_json')
+    def test_public_repos(self, mock_get_json):
         org_name = "example"
-        payload = {"url": "https://api.github.com/orgs/example"}
+        payload = [
+            {"name": "repo1"},
+            {"name": "repo2"},
+            {"name": "repo3"}
+        ]
+        expected_repos = [repo["name"] for repo in payload]
 
-        with patch.object(GithubOrgClient, 'org', new_callable=mock.PropertyMock) as mock_org:
-            mock_org.return_value = payload
+        mock_get_json.return_value = payload
 
+        with patch.object(GithubOrgClient, '_public_repos_url', new_callable=mock.PropertyMock) as mock_public_repos_url:
             gc = GithubOrgClient(org_name)
-            result = gc._public_repos_url
+            repos = gc.public_repos()
 
-            expected_url = payload["url"]
-            self.assertEqual(result, expected_url)
+            mock_public_repos_url.assert_called_once()
+            mock_get_json.assert_called_once()
+
+            self.assertEqual(repos, expected_repos)
 
 if __name__ == '__main__':
     unittest.main()
